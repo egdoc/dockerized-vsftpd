@@ -6,6 +6,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+HASHED_PASSWORD="$(openssl passwd -1 -noverify "${FTP_PASS}")"; readonly HASHED_PASSWORD
+
 # Create directories:
 # /srv/ftp/${FTP_USER}  -> The home directory of the virtual user
 # /etc/vsftpd           -> The directory that will host password file
@@ -20,7 +22,7 @@ chown -R ftp:ftp "/srv/ftp/${FTP_USER}/content"
 touch /etc/vsftpd.chroot_list
 
 # Create password file database
-htpasswd -bcd "/etc/vsftpd/virtual_users.pwd" "${FTP_USER}" "${FTP_PASS}"
+echo "${FTP_USER}:${HASHED_PASSWORD}" > "/etc/vsftpd/virtual_users.pwd"
 
 # Launch vsftpd
 /usr/sbin/vsftpd
